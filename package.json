@@ -1,0 +1,23 @@
+{
+  "name": "phyvideo-atomic-fine-structure",
+  "version": "2.0.0",
+  "private": true,
+  "description": "原子的精细结构（第四章）3D 可视化讲解视频 —— 源码与渲染脚本",
+  "scripts": {
+    "render": "node render-all.js",
+    "render:gpu": "node render-all.js --gpu",
+    "preview": "node render-all.js --preview",
+    "postinstall": "playwright install chromium"
+  },
+  "dependencies": {
+    "@fontsource/jetbrains-mono": "5.0.20",
+    "@fontsource/noto-sans-sc": "5.0.19",
+    "@fontsource/noto-serif-sc": "5.0.12",
+    "katex": "0.16.9",
+    "playwright": "1.63.0",
+    "three": "0.160.0"
+  },
+  "optionalDependencies": {
+    "ffmpeg-static": "^5.2.0"
+  }
+}

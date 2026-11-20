@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<title>原子的精细结构</title>
+<link rel="stylesheet" href="node_modules/katex/dist/katex.min.css">
+<link rel="stylesheet" href="node_modules/@fontsource/noto-sans-sc/chinese-simplified-300.css">
+<link rel="stylesheet" href="node_modules/@fontsource/noto-sans-sc/chinese-simplified-400.css">
+<link rel="stylesheet" href="node_modules/@fontsource/noto-sans-sc/chinese-simplified-500.css">
+<link rel="stylesheet" href="node_modules/@fontsource/noto-sans-sc/chinese-simplified-700.css">
+<link rel="stylesheet" href="node_modules/@fontsource/noto-sans-sc/chinese-simplified-900.css">
+<link rel="stylesheet" href="node_modules/@fontsource/noto-sans-sc/latin-300.css">
+<link rel="stylesheet" href="node_modules/@fontsource/noto-sans-sc/latin-400.css">
+<link rel="stylesheet" href="node_modules/@fontsource/noto-sans-sc/latin-500.css">
+<link rel="stylesheet" href="node_modules/@fontsource/noto-sans-sc/latin-700.css">
+<link rel="stylesheet" href="node_modules/@fontsource/noto-sans-sc/latin-900.css">
+<link rel="stylesheet" href="node_modules/@fontsource/jetbrains-mono/latin-400.css">
+<link rel="stylesheet" href="node_modules/@fontsource/jetbrains-mono/latin-500.css">
+<link rel="stylesheet" href="node_modules/@fontsource/jetbrains-mono/latin-700.css">
+<script type="importmap">{ "imports": { "three": "./node_modules/three/build/three.module.js", "three/addons/": "./node_modules/three/examples/jsm/" } }</script>
+<style>
+  /* ============ NOIR palette: warm black · cream line · one orange accent ============ */
+  :root{--bg:#0a0806;--txt:#ece6da;--sub:#9a9184;--dim:#6b645a;--or:#ff6a1f;--amber:#ffbf73;--rose:#ff5a6e;--steel:#9bb7c9;--mint:#bfe3cf;--peach:#ffd9b0;--cream:#efe8dc;
+        --mono:"JetBrains Mono",ui-monospace,monospace;--heavy:"Noto Sans SC",sans-serif}
+  html,body{margin:0;padding:0;width:1920px;height:1080px;overflow:hidden;background:var(--bg)}
+  body{font-family:"Noto Sans SC",sans-serif;color:var(--txt);font-weight:400;-webkit-font-smoothing:antialiased}
+  #c{position:absolute;left:0;top:0;width:1920px;height:1080px}
+  #ov{position:absolute;left:0;top:0;width:1920px;height:1080px;pointer-events:none;overflow:hidden}
+  #vig{position:absolute;inset:0;pointer-events:none;background:radial-gradient(ellipse at 50% 48%,rgba(0,0,0,0) 48%,rgba(0,0,0,.62) 100%)}
+  #grain{position:absolute;left:0;top:0;width:1920px;height:1080px;pointer-events:none;opacity:.045;mix-blend-mode:screen}
+  .katex{font-size:1.05em}
+  /* ---- world labels: mono tags on dark pills (like "1e-6", "P(doom) 0.03") ---- */
+  .lbl{position:absolute;left:0;top:0;white-space:nowrap;font-size:21px;font-weight:500;opacity:0;will-change:transform;font-family:var(--mono);
+       padding:2px 10px 3px 10px;border-radius:4px;background:rgba(12,10,8,.86);letter-spacing:.3px;color:var(--txt)}
+  .lbl .dot{display:inline-block;width:7px;height:7px;border-radius:1px;margin-right:8px;vertical-align:2px}
+  .lbl .katex{font-size:1.0em}
+  .lbl.bare{background:none;text-shadow:0 0 10px rgba(0,0,0,.95),0 0 3px rgba(0,0,0,.9);padding:0;font-family:"Noto Sans SC",sans-serif;font-weight:500}
+  .lbl.tag{color:var(--or);font-weight:700}
+  /* ---- cards: typographic panels living in 3D (no glass box) ---- */
+  .card{position:absolute;opacity:0;padding:30px 40px 32px 38px;font-size:28px;line-height:1.62;color:#d8d1c4;transform-origin:0 0;
+        background:radial-gradient(closest-side,rgba(9,7,5,.88) 0%,rgba(9,7,5,.80) 55%,rgba(9,7,5,.42) 82%,rgba(9,7,5,0) 100%);will-change:transform}
+  .card::before{content:"";position:absolute;left:14px;top:34px;width:2px;height:var(--rule,0px);background:linear-gradient(var(--or),rgba(255,106,31,0))}
+  .card .kick{font-family:var(--mono);font-size:17px;letter-spacing:3px;color:var(--or);font-weight:700;margin-bottom:6px;text-transform:uppercase;white-space:nowrap}
+  .card h3{margin:0 0 12px 0;font-size:44px;line-height:1.22;color:var(--cream);font-weight:900;letter-spacing:.5px}
+  .card h3 .ch{opacity:0}
+  .card h3 .ch.on{opacity:1}
+  .card h3 .ch.cur{color:#fff;text-shadow:0 0 14px rgba(255,106,31,.95),0 0 4px rgba(255,140,60,.9)}
+  .card .f{font-size:38px;margin:12px 0;text-align:center;color:#fff}
+  .card .f2{font-size:31px;margin:8px 0;text-align:center;color:#fff}
+  .card .s{font-size:22px;color:var(--sub);line-height:1.6}
+  .card hr{border:none;height:1px;background:linear-gradient(90deg,rgba(255,106,31,.55),rgba(255,106,31,0));margin:14px 0}
+  .card ol,.card ul{margin:6px 0 0 0;padding-left:32px}
+  .card li{margin:5px 0}
+  .card li::marker{color:var(--or);font-family:var(--mono);font-weight:700}
+  .k{color:var(--amber)}.c{color:#fff;font-weight:500}.m{color:var(--or)}.r{color:var(--rose)}.g{color:var(--mint)}.b{color:var(--steel)}.w{color:#fff}
+  /* ---- HUD: minimal mono ---- */
+  #chip{position:absolute;left:64px;top:44px;opacity:0;display:flex;align-items:baseline;gap:16px;font-family:var(--mono)}
+  #chip .n{font-size:22px;font-weight:700;color:var(--or);letter-spacing:1px;padding:2px 9px;background:rgba(255,106,31,.12);border-radius:3px}
+  #chip .t{font-size:24px;font-weight:500;color:var(--txt);letter-spacing:1px;font-family:"Noto Sans SC",sans-serif}
+  #chip .u{display:none}
+  #prog{position:absolute;left:64px;right:64px;bottom:34px;opacity:0;display:flex;align-items:center;height:22px}
+  #prog .st{flex:1;position:relative;height:22px}
+  #prog .st i{position:absolute;left:0;right:6px;top:10px;height:2px;background:rgba(239,232,220,.14)}
+  #prog .st b{position:absolute;left:0;top:-22px;font-weight:500;font-size:14px;color:var(--dim);letter-spacing:1px;white-space:nowrap;font-family:var(--mono)}
+  #prog .st.done i{background:rgba(239,232,220,.45)}
+  #prog .st.on i{background:var(--or);box-shadow:0 0 10px rgba(255,106,31,.7)}
+  #prog .st.on b{color:var(--or)}
+  /* ---- title / end (fallback, 3D sequence is primary) ---- */
+  .title{position:absolute;left:0;top:0;width:1920px;height:1080px;display:flex;flex-direction:column;align-items:center;justify-content:center;opacity:0}
+  .title .k1{font-family:var(--mono);font-size:22px;letter-spacing:10px;color:var(--or);font-weight:700}
+  .title .t1{font-size:120px;font-weight:900;letter-spacing:6px;color:var(--cream);margin:18px 0 10px}
+  .title .line{height:2px;background:var(--or);margin:18px 0 26px}
+  .title .t2{font-size:30px;color:var(--txt);letter-spacing:4px;font-weight:400}
+  .title .t3{font-family:var(--mono);font-size:16px;color:var(--dim);margin-top:18px;letter-spacing:6px}
+  /* ---- chain ---- */
+  .chain{display:flex;align-items:center;gap:16px;font-size:25px}
+  .node{padding:10px 18px;border-radius:4px;border:1px solid rgba(239,232,220,.22);background:rgba(10,8,6,.6);text-align:center;line-height:1.45;color:var(--txt)}
+  .node .h{font-size:20px;letter-spacing:2px;font-family:var(--mono);font-weight:700}
+  .arr{font-size:28px;color:var(--or)}
+  .branches{display:flex;flex-direction:column;gap:10px}
+  .br{display:flex;align-items:center;gap:12px}
+  .tag{font-size:17px;color:var(--sub);width:130px;text-align:right;letter-spacing:1px;font-family:var(--mono)}
+  svg text{font-family:"JetBrains Mono","Noto Sans SC",sans-serif}
+  .tbl{border-collapse:collapse;font-size:22px;margin:8px auto;color:var(--txt)}
+  .tbl td,.tbl th{border-bottom:1px solid rgba(239,232,220,.12);padding:6px 14px;text-align:center;font-weight:400}
+  .tbl th{color:var(--or);font-size:16px;letter-spacing:2px;font-family:var(--mono);font-weight:700}
+  .pill{display:inline-block;padding:2px 10px;border-radius:3px;border:1px solid rgba(239,232,220,.3);font-size:20px;margin:2px;font-family:var(--mono)}
+  .big{font-size:46px;color:#fff;text-align:center;margin:10px 0;font-weight:700}
+  .tl{display:flex;gap:18px;align-items:stretch}
+  .tl .yr{font-size:34px;color:var(--or);font-weight:700;font-family:var(--mono)}
+  .tl .it{flex:1;padding:14px 16px;border:1px solid rgba(239,232,220,.14);background:rgba(10,8,6,.5);font-size:22px;line-height:1.5}
+  /* ---- kinetic world type ---- */
+  .wt{position:absolute;left:0;top:0;transform-origin:0 0;white-space:nowrap;will-change:transform;line-height:1;pointer-events:none}
+  .wt.heavy{font-family:"Noto Sans SC",sans-serif;font-weight:900;color:var(--cream);letter-spacing:2px}
+  .wt.mono{font-family:var(--mono);font-weight:700;color:var(--or)}
+  .wt .ch{opacity:0;display:inline-block}
+  .wt .ch.on{opacity:1}
+  .wt .ch.cur{color:#fff;text-shadow:0 0 30px rgba(255,106,31,1),0 0 10px rgba(255,150,70,1)}
+  #fade{position:absolute;left:0;top:0;width:1920px;height:1080px;background:#000;opacity:0}
+</style>
+</head>
+<body>
+<canvas id="c" width="1920" height="1080"></canvas>
+<canvas id="grain" width="960" height="540"></canvas>
+<div id="vig"></div>
+<div id="ov"></div>
+<div id="fade"></div>
+<script type="module">const n = new URLSearchParams(location.search).get("ep") || "1"; import("./ep" + n + ".js");</script>
+</body>
+</html>
